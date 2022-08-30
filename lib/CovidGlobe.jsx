@@ -1,174 +1,68 @@
 import Inspector from "./Inspector";
 import { Canvas } from '@react-three/fiber';
-/*
-import { useEffect, useMemo, useState } from "react";
-import { Leaf } from "@wonderlandlabs/forest";
+import { useContext, useEffect, useMemo } from "react";
+import GlobeContext from "./GlobeContext";
+import TimeScale from "./TimeScale";
 import dayjs from "dayjs";
-import axios from "axios";
-*/
+import ValueSeries from "./ValueScales";
 
-const CONTINENTS = ['all', 'Africa', 'Europe', 'Americas', 'Asia'];
+let ThreeGlobe = null;
 
-const ThreeGlobe = require('three-globe').default;
+if (typeof window !== 'undefined') {
+  ThreeGlobe = require('three-globe').default;
+}
 
 const CovidGlobe = () => {
-/*  const leaf = useMemo(() => new Leaf(
-    {
-      geoJson: null,
-      time: 0,
-      continent: 'all',
-      animate: false,
-      animationInterval: 0.25,
-      globe: null,
-    },
-    {
-      selectors: {
-        currentDate({ time }) {
-          let date = dayjs(new Date(2020, 0, 1));
-          return date.add(time, 'd');
-        },
-        resolution({ continent }) {
-          switch (continent) {
-            case 'Europe':
-              return 4;
-              break;
-
-            case 'Americas':
-              return 3;
-              break;
-
-            case 'Africa':
-              return 3;
-              break;
-
-            default:
-              return 2;
-          }
-        },
-        features({ geoJson, continent }) {
-          if (!geoJson) {
-            return null;
-          }
-          if (continent === 'all') {
-            return geoJson;
-          }
-          const some = geoJson.filter((f) => {
-            if (f.properties.WB_A3 === 'RUS') {
-              return continent === 'Asia'
-            }
-            if (continent === 'Americas') {
-              return f.properties.CONTINENT === 'North America' || f.properties.CONTINENT === 'South America'
-            }
-            if (continent === 'Asia') {
-              if (f.properties.CONTINENT === 'Oceania') {
-                return true;
-              }
-            }
-            return f.properties.CONTINENT === continent
-          });
-
-          return some;
-        },
-      },
-
-      actions: {
-        newContinent(leaf, continent) {
-          leaf.do.setContinent(continent);
-        },
-        colorFn(leaf, country) {
-          /!* const {properties} = country;
-           const iso = properties.WB_A3;
-           const key = `${iso}-deaths`;
-           const pivot = model.base.table('pivots').getData(key);
-           if (!pivot) {
-             return BLACK.hex();
-           }
-           const {offset, st, data} = pivot;
-
-           const currentTime = leaf.selector('currentDate');
-
-           const pivotStartTime = dayjs(st).add(offset, 'd');
-           const index = currentTime.diff(pivotStartTime, 'd');
-
-
-           if (index < 0) return BLACK.hex();
-
-           if (index >= data.length) {
-             return model.valueToColor(data[data.length - 1]);
-           }
-           const color = model.valueToColor(data[index]);
-           return color;
-           *!/
-          return 'black';
-        },
-        toggleAnimate(leaf) {
-          leaf.do.setAnimate(!leaf.value.animate);
-          leaf.do.setTime(0);
-          if (leaf.value.animate) {
-            leaf.do.next();
-          }
-        },
-        next(leaf) {
-          if (!leaf.value.animate) {
-            return;
-          }
-
-          const currentTime = leaf.selector('currentDate');
-          if (currentTime.isSameOrAfter(new Date())) {
-            return;
-          }
-          setTimeout(leaf.do.advanceTime, leaf.value.animationInterval);
-        },
-        advanceTime(leaf) {
-          leaf.do.setTime(leaf.value.time + 1);
-          leaf.do.next();
-        },
-        loadGeoJson(leaf) {
-             axios.get('/geojson/ne_10m_admin_0_countries.geojson')
-               .then(({ data }) => {
-                 leaf.do.setGeoJson(data);
-               });
-        }
-      }
-    }
-  ), []);
-  useEffect(() => {
-    const sub = leaf.subscribe(setState);
-    leaf.do.loadGeoJson();
-    return () => sub.unsubscribe();
-  }, [leaf]);
-
-  const [state, setState] = useState(null);
-  const { geoJson, changing, continent = 'all', time, animate, $currentDate, $features, $resolution } = (state || {});
+  const { countries, resolution, colorOf, playing, play, stop, currentTime, progress, $valueSeries } = useContext(GlobeContext);
 
   const globe = useMemo(() => {
-    if ((!ThreeGlobe) || $features) {
-      return null;
+    if (!ThreeGlobe) {
+      return false;
     }
-    const globe = new ThreeGlobe({ animateIn: false })
-      .globeImageUrl('/img/earth-dark.jpg')
-      .hexPolygonsData($features)
-      .hexPolygonResolution($resolution)
+    return new ThreeGlobe({ animateIn: false })
+      .hexPolygonResolution(resolution)
       .hexPolygonMargin(0.1)
-      .hexPolygonColor(leaf.do.colorFn);
-    return globe;
-  }, [continent, $features, geoJson, ThreeGlobe, changing]);*/
-  const globe = new ThreeGlobe({ animateIn: false })
-    .globeImageUrl('/img/earth-dark.jpg')
-  return (
-    <Canvas>
-      <ambientLight color="#cddbfe"/>
-      <directionalLight color="#cddbfe"/>
-      <pointLight position={[10, 10, 10]}/>
+      .globeImageUrl('/img/earth-dark.jpg')
+      .hexPolygonColor((country) => {
+        return colorOf(country)
+      });
+  }, [countries, resolution, ThreeGlobe]);
 
-      {(
-        <mesh position={[-20, -5, -180]}>
-          <Inspector>
-            <primitive object={globe}/>
-          </Inspector>
-        </mesh>
-      )}
-    </Canvas>
+  useEffect(() => {
+    if (countries.length)
+    globe.hexPolygonsData([...countries])
+  }, [globe, currentTime, countries])
+
+  if (!globe || !countries.length || (typeof window === 'undefined')) {
+    return <div>loading...</div>;
+  }
+
+
+  return (
+    <>
+      <div style={{position: 'absolute', left: 0, right: 200, top: 0, padding: '1rem'}}>
+        <h1>Deaths from COVID-19 over time</h1>
+        <p>Click play button at bottom of screen</p>
+      </div>
+      <div style={{position: 'absolute', right: 0, top: 0}}>
+        <ValueSeries values={$valueSeries} />
+      </div>
+      <Canvas>
+        <ambientLight color="#cddbfe"/>
+        <directionalLight color="#cddbfe"/>
+        <pointLight position={[10, 10, 10]}/>
+        {(
+          <mesh position={[-20, -5, -180]}>
+            <Inspector>
+              <primitive object={globe}/>
+            </Inspector>
+          </mesh>
+        )}
+      </Canvas>
+      <TimeScale playing={playing} currentTime={currentTime} play={play} progress={progress} stop={stop}
+                 now={dayjs().format('MMMM YYYY')}/>
+
+    </>
   )
 }
 

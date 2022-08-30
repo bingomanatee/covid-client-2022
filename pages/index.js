@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 import dynamic from 'next/dynamic'
+import GlobeModel from "../lib/GlobeModel";
 
 const CovidGlobe = dynamic(() => import('../lib/CovidGlobe'), {
   ssr: false,
@@ -16,7 +17,9 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-      <CovidGlobe />
+        <GlobeModel>
+          <CovidGlobe />
+        </GlobeModel>
       </main>
     </div>
   )
