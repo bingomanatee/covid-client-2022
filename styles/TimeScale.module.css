@@ -1,0 +1,10 @@
+
+.play-stroke {
+    stroke: #336008 !important;
+    stroke-width: 1 !important;
+}
+
+.play-fill {
+    fill: #EAFFD5  !important;
+    opacity: 0.5;
+}

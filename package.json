@@ -6,7 +6,8 @@
     "dev": "next dev;./patch-frame.sh",
     "build": "next build;./patch-frame.sh",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "svgr": "npx @svgr/cli --no-svgo --no-prettier --out-dir './time scale/jsx' './time scale'"
   },
   "dependencies": {
     "@react-spring/three": "^9.5.2",

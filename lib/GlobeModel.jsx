@@ -23,6 +23,7 @@ const rangeThree = (n) => colorTwo.mix(colorThree, n);
 const rangeFour = (n) => colorThree.mix(colorFour, n);
 const rangeFive = (n) => colorFour.mix(colorFive, n);
 const rangeSix = (n) => colorFive.mix(colorSix, n);
+const version = Math.random();
 
 const ranges = [
   { max: 10 ** 3, range: rangeOne },
@@ -30,30 +31,57 @@ const ranges = [
   { max: 10 ** 4.5, range: rangeThree },
   { max: 10 ** 5, range: rangeFour },
   { max: 10 ** 6, range: rangeFive },
-  { max: 2 * 10 **6, range: rangeSix },
+  { max: 2 * 10 ** 6, range: rangeSix },
 ]
 const PLAY_TIME = 20;
 const TODAY = dayjs();
 const START_DATE = dayjs(new Date(2020, 0, 1));
 const UNIX_SPAN = TODAY.unix() - START_DATE.unix();
+const loadTime = Date.now();
+
+console.log('making model');
 
 const GlobeModel = ({ children }) => {
   const [value, setValue] = useState({ countries: false, resolution: 3 });
+
   let leaf = useMemo(() => new Leaf({
     deathData: [],
-    resolution: 3,
+    resolution: 2,
     width: 300,
     countries: [],
     time: 0,
     animationStartTime: null,
     playing: false,
-    currentTime: START_DATE
+    currentTime: START_DATE,
+    loadIndex: 0,
+    loaded: false,
   }, {
     actions: {
       play(leaf) {
         leaf.do.setAnimationStartTime(Date.now());
         leaf.do.setPlaying(true);
         leaf.do.animate();
+      },
+      initLoadCycle(leaf) {
+        setTimeout(() => {
+          leaf.do.loadCycle();
+        }, 500)
+      },
+      loadCycle(leaf) {
+        if (leaf.do.loaded) {
+          return;
+        }
+        const time = Date.now();
+        const rawIndex = (time - loadTime);
+        const index = Math.floor( rawIndex / 200) % 7;
+        console.log(version, ')---', time, 'raw index', rawIndex, 'index:', index, 'load time', loadTime);
+        if (index !== leaf.value.loadIndex) {
+          leaf.do.setLoadIndex(index);
+        }
+        setTimeout(() => {
+          leaf.do.loadCycle();
+        }, 50);
+
       },
       stop(leaf) {
         leaf.do.setPlaying(false);
@@ -94,7 +122,7 @@ const GlobeModel = ({ children }) => {
       loadCountries(leaf) {
         axios.get(
           //'/geojson/ne_10m_admin_1_states_provinces.geojson.json')
-          '/geojson/ne_10m_admin_0_countries.geojson.json')
+          '//localhost:3010/geojson/country.json')
           .then(({ data }) => {
             leaf.do.setCountries(data.features)
           });
@@ -103,7 +131,7 @@ const GlobeModel = ({ children }) => {
         if (!leaf.value.deathData) {
           return 0;
         }
-        const say = Math.random() < 0.01;
+        const say = false; // Math.random() < 0.01;
 
         const { properties: { ISO_A3 } } = country;
         if (say) {
@@ -148,26 +176,23 @@ const GlobeModel = ({ children }) => {
             let min = index ? ranges[index - 1].max : 0;
             const f = (n - min) / (max - min);
             const color = range(f);
-
-            console.log('colorOf value', n, 'f ', f, 'between', min, max, 'color:', color.hex());
-
             return `${color.hex()}`;
           }
         }
-        console.log('big deaths at ', n);
         return `${WHITE.hex()}`;
       },
     },
     selectors: {
       valueSeries({}, leaf) {
         let out = [];
-        function seriesFn (deaths) {
+
+        function seriesFn(deaths) {
           return { label: deaths, color: leaf.do.colorOf(deaths) }
         }
 
         for (let scale = 2; scale < 6; ++scale) {
           const index = 10 ** scale;
-          let values =  [
+          let values = [
             0,
             0.25,
             0.50,
@@ -175,7 +200,7 @@ const GlobeModel = ({ children }) => {
           ].map((offset) => seriesFn(index + (index * 10 - index) * offset));
           out.push(values);
         }
-        out.push([10 ** 6, 10 ** 6 * 1.25, 10 ** 6 * 1.5, 10 ** 6  * 2].map(seriesFn))
+        out.push([10 ** 6, 10 ** 6 * 1.25, 10 ** 6 * 1.5, 10 ** 6 * 2].map(seriesFn))
         return out;
       }
     }
@@ -187,6 +212,8 @@ const GlobeModel = ({ children }) => {
     leaf.do.loadCountries();
     return () => sub.unsubscribe();
   }, [leaf]);
+
+  leaf.do.initLoadCycle();
 
   return (
     <GlobeContext.Provider value={{
@@ -200,7 +227,10 @@ const GlobeModel = ({ children }) => {
       stop() {
         leaf.do.stop();
       },
-      progress: leaf.do.progressClamped()
+      progress: leaf.do.progressClamped(),
+      stopLoading() {
+        leaf.do.setLoaded(true);
+      }
     }}>
       {children}
     </GlobeContext.Provider>

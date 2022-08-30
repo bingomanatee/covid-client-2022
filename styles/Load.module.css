@@ -1,0 +1,31 @@
+
+.one, .two, .three, .four, .five, .six, .seven {
+    opacity :0;
+}
+.sequence-1 .one {
+    opacity: 1
+}
+
+.sequence-2 .two {
+    opacity: 1
+}
+
+.sequence-3 .three {
+    opacity: 1
+}
+
+.sequence-4 .four {
+    opacity: 1
+}
+
+.sequence-5 .five {
+    opacity: 1
+}
+
+.sequence-6 .six {
+    opacity: 1
+}
+
+.sequence-7 .seven {
+    opacity: 1
+}

@@ -94,21 +94,6 @@ h2, h3, h4 {
   font-size: 1rem;
 }
 
-.article-link h2 small, .intro h1 small {
-  color: rgba(0,0,0,0.5);
-  font-family:  "San Francisco Light", "Helvetica Neue", Helvetica, sans-serif;
-  text-transform: uppercase;
-  font-weight: 200;
-  display: inline-block;
-  margin-left: 2rem;
-}
-
-.hamburger-container {
-  position: absolute;
-  right: 0.5rem;
-  top: 0.5rem;
-}
-
 .noWrap, .noWrap * {
   white-space: nowrap;
 }

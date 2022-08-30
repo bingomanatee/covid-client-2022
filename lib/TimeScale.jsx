@@ -2,7 +2,8 @@ import { withSize } from 'react-sizeme';
 import { useResizeDetector } from 'react-resize-detector';
 import TimeMarker from './TimeMarker'
 import * as React from "react"
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import style from '../styles/TimeScale.module.css';
 
 const SvgComponent = (props) => {
   const { play, playing, stop, currentTime, progress } = props;
@@ -10,7 +11,7 @@ const SvgComponent = (props) => {
   const rightEdge = useMemo(() => width - (17 * 2), [width]);
   const leftEdge = 17;
   const BAR_WIDTH = useMemo(() => rightEdge - leftEdge, [width, rightEdge]);
-
+  const [playClicked, setPlayClicked] = useState(false);
   return (
     <div ref={ref} style={{
       position: "absolute",
@@ -88,19 +89,24 @@ const SvgComponent = (props) => {
         <g transform={`translate(${BAR_WIDTH * progress-45} 22)`}><TimeMarker currentTime={currentTime.format('MMM YY')} /></g>
 
         {!playing ? (
-            <g id="play-button" opacity={0.25} transform={`translate(${width / 2} 18) rotate(90)`} onClick={play}>
+            <g id="play-button" transform={`translate(${width / 2} 18) rotate(90)`}
+               onClick={() => {setPlayClicked(true); play();}}>
               <path
                 d="M29.0777088,7.15541753 L48.1055728,45.2111456 C49.0935298,47.1870596 48.2926324,49.5897518 46.3167184,50.5777088 C45.7612967,50.8554196 45.1488444,51 44.527864,51 L6.47213595,51 C4.26299696,51 2.47213595,49.209139 2.47213595,47 C2.47213595,46.3790196 2.61671632,45.7665674 2.89442719,45.2111456 L21.9222912,7.15541753 C22.9102482,5.17950354 25.3129404,4.37860615 27.2888544,5.36656315 C28.062964,5.75361795 28.690654,6.38130792 29.0777088,7.15541753 Z"
-                stroke="#6DD400"
+                stroke="#66FF00"
                 strokeWidth={2}
                 fill="none"
+                id="play-path"
                 strokeMiterlimit={5}
+                className={playClicked ? style['play-stroke'] : ''}
               />
               <g clipPath="url(#play)">
                 <polygon
                   points="2.47213595,4.94339568 48.5287403,4.94339568 48.5287403,51 2.47213595,51 2.47213595,4.94339568"
                   stroke="none"
-                  fill="#EAFFD5"
+                  fill="#99FF00"
+                  id="play-fill"
+                  className={playClicked ? style['play-fill'] : ''}
                 />
               </g>
             </g>

@@ -5,6 +5,8 @@ import GlobeContext from "./GlobeContext";
 import TimeScale from "./TimeScale";
 import dayjs from "dayjs";
 import ValueSeries from "./ValueScales";
+import LoadScreen from "./LoadScreen";
+import styles from '../styles/Globe.module.css'
 
 let ThreeGlobe = null;
 
@@ -13,7 +15,7 @@ if (typeof window !== 'undefined') {
 }
 
 const CovidGlobe = () => {
-  const { countries, resolution, colorOf, playing, play, stop, currentTime, progress, $valueSeries } = useContext(GlobeContext);
+  const { countries, resolution, colorOf, playing, play, stop, currentTime, progress, $valueSeries, loading, stopLoading, loadIndex } = useContext(GlobeContext);
 
   const globe = useMemo(() => {
     if (!ThreeGlobe) {
@@ -34,9 +36,14 @@ const CovidGlobe = () => {
   }, [globe, currentTime, countries])
 
   if (!globe || !countries.length || (typeof window === 'undefined')) {
-    return <div>loading...</div>;
+    return <div className={styles['load-screen']}>
+      <LoadScreen sequence={loadIndex} />
+    </div>
   }
 
+  if (loading) {
+    stopLoading();
+  }
 
   return (
     <>
