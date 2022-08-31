@@ -101,3 +101,12 @@ h2, h3, h4 {
 form *, input, textarea, form button {
   font-family: "San Francisco", "Helvetica Neue", sans-serif;
 }
+
+.scope-stroke {
+  stroke:#9E9E9E;
+}
+
+.scopee:hover .scope-stroke {
+  stroke: #0029c4;
+  stroke-width: 4px;
+}

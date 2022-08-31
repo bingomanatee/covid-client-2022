@@ -1,0 +1,15 @@
+
+
+.title-flipped {
+    font-family: "San Francisco Light", HelveticaNeue, Helvetica Neue, sans-serif;
+    font-size: 0.8rem;
+    font-weight: normal;
+    opacity: 0.66
+}
+
+.title {
+    font-family: "San Francisco Display", HelveticaNeue, Helvetica Neue, sans-serif;
+    font-size: 1.1rem;
+    fill: rgb(0, 65, 103);
+    text-decoration: underline;
+}

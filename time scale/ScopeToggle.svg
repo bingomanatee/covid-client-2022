@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg version="1.1" width="135px" height="41px" viewBox="0 0 135.0 41.0" xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <clipPath id="scope-i0">
+            <path d="M135,0 L135,41 L0,41 L0,0 L135,0 Z"></path>
+        </clipPath>
+        <clipPath id="scope-i1">
+            <path d="M67.5,0 C104.779221,0 135,30.2207794 135,67.5 C135,104.779221 104.779221,135 67.5,135 C30.2207794,135 0,104.779221 0,67.5 C0,30.2207794 30.2207794,0 67.5,0 Z"></path>
+        </clipPath>
+        <radialGradient id="scope-i2" cx="67.5px" cy="63.885335px" r="135px"
+                        gradientTransform="translate(131.38533501770723 -3.6146649822928336) rotate(90.0)"
+                        gradientUnits="userSpaceOnUse">
+            <stop stop-color="#FFFFFF" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" offset="27.9190207%"></stop>
+            <stop stop-color="#E7E6E6" offset="43.5721354%"></stop>
+            <stop stop-color="#C9C7C7" offset="50.400907%"></stop>
+            <stop stop-color="#999696" offset="56.9009658%"></stop>
+            <stop stop-color="#000000" offset="100%"></stop>
+        </radialGradient>
+    </defs>
+    <g clip-path="url(#scope-i0)">
+        <g transform="translate(0.0 -94.0)">
+            <g clip-path="url(#scope-i1)">
+                <polygon points="0,94 135,94 135,135 0,135 0,94" stroke="none" fill="url(#scope-i2)"></polygon>
+                <path d="M67.5,135 C104.779221,135 135,104.779221 135,67.5 C135,30.2207794 104.779221,0 67.5,0 C30.2207794,0 0,30.2207794 0,67.5 C0,104.779221 30.2207794,135 67.5,135 Z"
+                      stroke="#9E9E9E" stroke-width="2" fill="none" stroke-miterlimit="5"></path>
+            </g>
+        </g>
+        <g transform="translate(36.0 3.0)">
+            <text transform="translate(0.8859999999999992 11.0)" font-family="HelveticaNeue, Helvetica Neue"
+                  font-size="12.0" font-weight="normal" fill="#000000" text-anchor="center">By Country
+            </text>
+        </g>
+        <g transform="translate(100.0 34.99999999999999) rotate(180.0)">
+            <text transform="translate(0.8879999999999981 11.0)" font-family="HelveticaNeue, Helvetica Neue"
+                  font-size="12.0" font-weight="normal" fill="rgba(0, 0, 0, 0.5)" text-anchor="center">By Province
+            </text>
+        </g>
+    </g>
+</svg>

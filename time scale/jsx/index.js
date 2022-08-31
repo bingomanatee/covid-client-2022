@@ -1,3 +1,4 @@
+export { default as ScopeToggle } from './ScopeToggle'
 export { default as LoadScreen } from './LoadScreen'
 export { default as TimeMarker } from './TimeMarker'
 export { default as TimeScalePlay } from './TimeScalePlay'

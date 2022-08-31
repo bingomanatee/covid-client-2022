@@ -3,7 +3,7 @@ import { useResizeDetector } from 'react-resize-detector';
 import TimeMarker from './TimeMarker'
 import * as React from "react"
 import { useMemo, useState } from "react";
-import style from '../styles/TimeScale.module.css';
+import style from '../styles/TimeLine.module.css';
 
 const SvgComponent = (props) => {
   const { play, playing, stop, currentTime, progress } = props;
@@ -93,12 +93,10 @@ const SvgComponent = (props) => {
                onClick={() => {setPlayClicked(true); play();}}>
               <path
                 d="M29.0777088,7.15541753 L48.1055728,45.2111456 C49.0935298,47.1870596 48.2926324,49.5897518 46.3167184,50.5777088 C45.7612967,50.8554196 45.1488444,51 44.527864,51 L6.47213595,51 C4.26299696,51 2.47213595,49.209139 2.47213595,47 C2.47213595,46.3790196 2.61671632,45.7665674 2.89442719,45.2111456 L21.9222912,7.15541753 C22.9102482,5.17950354 25.3129404,4.37860615 27.2888544,5.36656315 C28.062964,5.75361795 28.690654,6.38130792 29.0777088,7.15541753 Z"
-                stroke="#66FF00"
-                strokeWidth={2}
                 fill="none"
                 id="play-path"
                 strokeMiterlimit={5}
-                className={playClicked ? style['play-stroke'] : ''}
+                className={playClicked ? style['play-stroke-clicked'] :  style['play-stroke']}
               />
               <g clipPath="url(#play)">
                 <polygon
@@ -106,7 +104,7 @@ const SvgComponent = (props) => {
                   stroke="none"
                   fill="#99FF00"
                   id="play-fill"
-                  className={playClicked ? style['play-fill'] : ''}
+                  className={playClicked ? style['play-fill-clicked'] : style['play-fill']  }
                 />
               </g>
             </g>

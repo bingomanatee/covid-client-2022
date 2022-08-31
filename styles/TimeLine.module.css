@@ -1,0 +1,19 @@
+
+.play-stroke {
+    stroke: #336008;
+    stroke-width: 4;
+}
+
+.play-fill {
+    fill: #EAFFD5  !important;
+}
+
+.play-stroke-clicked {
+    stroke: #5c8d2b;
+    stroke-width: 1;
+}
+
+.play-fill-clicked {
+    fill: #EAFFD5;
+    opacity: 0.5;
+}
