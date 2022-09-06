@@ -79,6 +79,7 @@ function analyze(target) {
   }
 }
 
+const API_URL = 'http://100.21.24.136/'
 
 let leaf = new Leaf({
   stateDeathData: [],
@@ -191,17 +192,17 @@ let leaf = new Leaf({
       requestAnimationFrame(leaf.do.animate);
     },
     loadCountryDeathData(leaf) {
-      axios.get('//localhost:3010/country/summary')
+      axios.get(API_URL + 'country/summary')
         .then(({ data }) => leaf.do.setCountryDeathData(data));
 
     },
     loadStateDeathData(leaf) {
-      axios.get('//localhost:3010/state/summary')
+      axios.get(API_URL + 'state/summary')
         .then(({ data }) => leaf.do.setStateDeathData(data));
     },
     loadCountries(leaf) {
       axios.get(
-        '//localhost:3010/geojson/country.json')
+        API_URL + 'geojson/country.json')
         .then(({ data }) => {
           leaf.do.setCountries(data.features)
         });
@@ -210,7 +211,7 @@ let leaf = new Leaf({
       if (!leaf.value.loadingStates) {
         leaf.do.setLoadingStates(true);
         axios.get(
-          '//localhost:3010/geojson/state.json')
+          API_URL + 'geojson/state.json')
           .then(({ data }) => {
             leaf.do.setStates(data.features)
           });
