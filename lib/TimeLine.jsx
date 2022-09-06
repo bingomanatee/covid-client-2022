@@ -4,9 +4,21 @@ import TimeMarker from './TimeMarker'
 import * as React from "react"
 import { useMemo, useState } from "react";
 import style from '../styles/TimeLine.module.css';
+import { useContext } from "react";
+import GlobeContext from "./GlobeContext";
+
+const EDGE_FORMAT = 'MMM YY';
 
 const SvgComponent = (props) => {
-  const { play, playing, stop, currentTime, progress } = props;
+  const {
+    playing,
+    play,
+    stop,
+    currentTime,
+    progress,
+    endDate,
+    rewind
+  } = useContext(GlobeContext);
   const { width, height, ref } = useResizeDetector();
   const rightEdge = useMemo(() => width - (17 * 2), [width]);
   const leftEdge = 17;
@@ -52,6 +64,9 @@ const SvgComponent = (props) => {
             <path
               d="M27.2888544,5.36656315 C28.062964,5.75361795 28.690654,6.38130792 29.0777088,7.15541753 L48.1055728,45.2111456 C49.0935298,47.1870596 48.2926324,49.5897518 46.3167184,50.5777088 C45.7612967,50.8554196 45.1488444,51 44.527864,51 L6.47213595,51 C4.26299696,51 2.47213595,49.209139 2.47213595,47 C2.47213595,46.3790196 2.61671632,45.7665674 2.89442719,45.2111456 L21.9222912,7.15541753 C22.9102482,5.17950354 25.3129404,4.37860615 27.2888544,5.36656315 Z"/>
           </clipPath>
+          <clipPath id="rewind">
+            <path d="M24.096755,0 L10.1148934,24 L24.096755,48 L13.9818615,48 L0,24 L13.9818615,0 L24.096755,0 Z"/>
+          </clipPath>
         </defs>
 
         <g id="bar" transform="translate(17.0 31.0)">
@@ -82,12 +97,24 @@ const SvgComponent = (props) => {
                 fill="#000000"
                 textAnchor="right"
               >
-                {props.now}
+                {endDate.format(EDGE_FORMAT)}
               </text>
             </g>
           </g>
-        <g transform={`translate(${BAR_WIDTH * progress-45} 22)`}><TimeMarker currentTime={currentTime.format('MMM YY')} /></g>
+        <g transform={`translate(${BAR_WIDTH * progress-45} 22)`}><TimeMarker currentTime={currentTime.format(EDGE_FORMAT)} /></g>
 
+        <g transform={`translate(${width / 2} 18) `} id="rewind" onClick={rewind}>
+          <g transform="translate(-100 0)">
+            <g clipPath="url(#rewind)">
+              <polygon
+                className={ style['rewind-fill']}
+                  points="0,0 24.096755,0 24.096755,48 0,48 0,0"/>
+            </g>
+            <polygon points="13.9818615,0 24.096755,0 10.1148934,24 24.096755,48 13.9818615,48 0,24 13.9818615,0 13.9818615,0"
+                     className={ style['rewind-stroke']}/>
+
+          </g>
+        </g>
         {!playing ? (
             <g id="play-button" transform={`translate(${width / 2} 18) rotate(90)`}
                onClick={() => {setPlayClicked(true); play();}}>
@@ -110,8 +137,8 @@ const SvgComponent = (props) => {
             </g>
           ) :
           (
-            <g id="pause-button" opacity={0.25} transform={`translate(${width / 2 - 50}  20)`} onClick={stop}>
-              <g clipPath="url(#stop)">
+            <g id="pause-button" opacity={0.25} transform={`translate(${width / 2 - 50}  20)`}>
+              <g clipPath="url(#stop)" onClick={stop}>
                 <polygon
                   points="0,0 16,0 16,48 0,48 0,0"
                   stroke="none"
@@ -123,9 +150,9 @@ const SvgComponent = (props) => {
                 stroke="#FF8080"
                 strokeWidth={1}
                 fill="none"
-                strokeMiterlimit={10}
+                strokeMiterlimit={10} onClick={stop}
               />
-              <g transform="translate(20.0 0.0)">
+              <g transform="translate(20.0 0)" onClick={stop}>
                 <g clipPath="url(#stop)">
                   <polygon
                     points="0,0 16,0 16,48 0,48 0,0"

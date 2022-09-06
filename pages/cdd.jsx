@@ -1,24 +1,22 @@
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
-import dynamic from 'next/dynamic'
 import GlobeModel from "../lib/GlobeModel";
+import { CDDTable } from "../lib/CDDTable";
+import CDDForm from "../lib/CDDForm";
 
-const CovidGlobe = dynamic(() => import('../lib/CovidGlobe'), {
-  ssr: false,
-})
 
-export default function Home() {
+export default function Cdd() {
   return (
     <div className={styles.container}>
       <Head>
         <title>Covid State/Country Death Data</title>
-        <meta name="description" content="Covid State/Country Death Data" />
+        <meta name="description" content="Tablular data" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main className={styles.main}>
         <GlobeModel>
-          <CovidGlobe />
+          <CDDForm />
         </GlobeModel>
       </main>
     </div>

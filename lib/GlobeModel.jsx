@@ -23,7 +23,6 @@ const rangeThree = (n) => colorTwo.mix(colorThree, n);
 const rangeFour = (n) => colorThree.mix(colorFour, n);
 const rangeFive = (n) => colorFour.mix(colorFive, n);
 const rangeSix = (n) => colorFive.mix(colorSix, n);
-const version = Math.random();
 
 const ranges = [
   { max: 10 ** 3, range: rangeOne },
@@ -60,12 +59,33 @@ function colorOf(scope, n) {
   return `${WHITE.hex()}`;
 }
 
+function getIso3(target) {
+  if (target.iso3) return target.iso3;
+  return target.adm0_a3;
+}
+
+function getAdmin2(target) {
+  if (target.admin2) return target.admin2;
+  return target.name;
+}
+
+function analyze(target) {
+  if (target.properties) {
+    return analyze(target.properties);
+  }
+  return {
+    iso3: getIso3(target),
+    admin2: getAdmin2(target)
+  }
+}
+
+
 let leaf = new Leaf({
   stateDeathData: [],
   countryDeathData: [],
   width: 300,
-  countries: [],
-  states: [],
+  countries: [], // geojson shape data
+  states: [],    // geojson shape data
   time: 0,
   animationStartTime: null,
   playing: false,
@@ -75,10 +95,15 @@ let leaf = new Leaf({
   loading: true,
   toggling: false,
   loadingStates: false,
+  endDate: TODAY,
 }, {
   actions: {
     play(leaf) {
-      leaf.do.setAnimationStartTime(Date.now());
+      const progress  = leaf.do.progress();
+      const progressSeconds = PLAY_TIME * progress;
+      const newAnimationStartTime = dayjs().subtract(progressSeconds, 's');
+      leaf.do.setAnimationStartTime(newAnimationStartTime.toDate());
+
       leaf.do.setPlaying(true);
       leaf.do.animate();
     },
@@ -88,6 +113,8 @@ let leaf = new Leaf({
       }, 500)
     },
     toggleScope(leaf) {
+      const currentTime = leaf.value.currentTime;
+      leaf.do.stop();
       if (leaf.value.toggling) {
         return;
       }
@@ -98,7 +125,15 @@ let leaf = new Leaf({
         leaf.do.setScope(SCOPE_STATE);
       }
       leaf.do.setToggling(true);
-      setTimeout(() => leaf.do.setToggling(false), 100);
+      leaf.do.setCurrentTime(currentTime);
+      setTimeout(() => {
+        leaf.do.setCurrentTime(currentTime);
+        leaf.do.setToggling(false)
+      }, 100);
+    },
+    rewind(leaf) {
+      leaf.do.stop();
+      leaf.do.setCurrentTime(START_DATE);
     },
     loadCycle(leaf) {
       if (typeof windows === 'undefined') {
@@ -129,9 +164,8 @@ let leaf = new Leaf({
       leaf.do.setPlaying(false);
     },
     progress(leaf) {
-
       if (!leaf.value.playing) {
-        return (leaf.value.currentTime.unix() - START_DATE.unix()) / PLAY_TIME;
+        return (leaf.value.currentTime.unix() - START_DATE.unix()) / (UNIX_SPAN);
       }
 
       const secondsSinceStart = (leaf.value.time - leaf.value.animationStartTime) / 1000.0;
@@ -182,43 +216,93 @@ let leaf = new Leaf({
           });
       }
     },
-    locationMatch(leaf, location) {
-      const { properties: { iso3, admin2 } } = location;
-      const { scope } = leaf.value;
-      const deathData = leaf.selector('deathData');
+    getDeathDataForLocation(leaf, location, scope) {
+      const {iso3, admin2} = analyze(location);
+      if (!scope) {
+        scope = leaf.value.scope;
+      }
       let match;
       switch (scope) {
         case SCOPE_COUNTRY:
-          match = deathData.find((deathItem) => deathItem.level === 1
+          match = leaf.value.countryDeathData.find((deathItem) => deathItem.level === 1
             && deathItem.iso3 === iso3);
           break;
 
         case SCOPE_STATE:
-          match = deathData.find((deathItem) => deathItem.level === 2
+          match = leaf.value.stateDeathData.find((deathItem) => deathItem.level === 2
             && deathItem.iso3 === iso3
             && deathItem.admin2 === admin2
           );
           break
       }
-      if (!match) {
-        try {
-          const someStates = deathData.filter((dd) => dd.iso3 === iso3);
-          console.log(scope, 'cannot find ', iso3, admin2, 'in', someStates)
-        } catch (err) {
-          console.log('error:', err);
-        }
-      }
       return match;
     },
-    deaths(leaf, location) {
-      if (!leaf.selector('deathData').length) {
+    checkCountryDeaths(leaf, location) {
+      if (!leaf.value.countryDeathData.length) {
+        console.log('no death data')
         return 0;
       }
-      const match = leaf.do.locationMatch(location);
-      if (!match) {
-        return 0;
-      }
+      if (leaf.value.scope === SCOPE_STATE) {
+        const {iso3, admin2} = analyze(location);
+        const say = iso3 === 'ITA';
+        function c(...args) {
+          if (say) console.log(...args);
+        }
+        const match = leaf.do.getDeathDataForLocation({iso3, admin2}, SCOPE_COUNTRY);
+        if (!match) {
+          c('no death data for ', iso3);
+          return 0;
+        }
+        const deaths = leaf.do.deathDataToNumber(match);
+        c('analyzing ', iso3, admin2, 'country deaths: ', deaths);
+        if (deaths === 0) {
+          c('no deaths in country', iso3);
+          return 0;
+        }
+        c('checking country deaths for ', location, ' country deaths = ', deaths);
+        return deaths;
 
+        const otherStatesInCountry = leaf.value.states.find(
+          (shapeState) => analyze(shapeState).iso3 === iso3);
+
+        if (!otherStatesInCountry.length) return deaths;
+
+        let statesWithKnownDeaths = 0;
+        let statesWithoutKnownDeaths = 0;
+
+        otherStatesInCountry.forEach((shapeState) => {
+          let dd = leaf.do.getDeathDataForLocation(shapeState, SCOPE_STATE);
+          if (dd) {
+            statesWithKnownDeaths += 1;
+          } else {
+            statesWithoutKnownDeaths += 1;
+          }
+        });
+        if (statesWithKnownDeaths && statesWithKnownDeaths) {
+          /**
+           * the deaths will be scaled the number of unspecified states / number of total states
+           */
+          return Math.round( deaths * statesWithoutKnownDeaths / otherStatesInCountry.length);
+        } else {
+          return deaths;
+        }
+      } else {
+        console.log('ccd scope is not state');
+        return 0;
+      }
+    },
+    deaths(leaf, location) {
+      if (!location || (!location.properties) || !leaf.selector('deathData').length) {
+        return 0;
+      }
+      const match = leaf.do.getDeathDataForLocation(location);
+      if (!match) {
+        return leaf.do.checkCountryDeaths(location);
+      }
+      return leaf.do.deathDataToNumber(match);
+    },
+
+    deathDataToNumber(leaf, match){
       const start = dayjs(match.start * 1000);
       const offset = leaf.value.currentTime.diff(start, 'd');
       if (offset < 0) {
@@ -268,7 +352,7 @@ let leaf = new Leaf({
       return scope === SCOPE_STATE ? states : countries
     },
     resolution({scope}) {
-      return scope === SCOPE_COUNTRY ? 3 : 4;
+      return scope === SCOPE_COUNTRY ? 2 : 3;
     }
   }
 });
@@ -291,7 +375,6 @@ const GlobeModel = ({ children }) => {
     leaf.do.initLoadCycle();
   }
 
-  console.log('value:', value);
   return (
     <GlobeContext.Provider value={{
       leaf,
@@ -313,6 +396,9 @@ const GlobeModel = ({ children }) => {
       },
       toggleScope() {
         leaf.do.toggleScope();
+      },
+      rewind() {
+        leaf.do.rewind();
       }
     }}>
       {children}

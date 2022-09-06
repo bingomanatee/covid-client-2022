@@ -31,7 +31,8 @@ const CovidGlobe = () => {
     loadIndex,
     toggleScope,
     scope,
-    toggling
+    toggling,
+    rewind
   } = useContext(GlobeContext);
 
   const globe = useMemo(() => {
@@ -82,8 +83,7 @@ const CovidGlobe = () => {
           </mesh>
         )}
       </Canvas>
-      <TimeScale playing={playing} currentTime={currentTime} play={play} progress={progress} stop={stop}
-                 now={dayjs().format('MMMM YYYY')}/>
+      <TimeScale />
       <header className={styles.header}>
         <div className={styles.title}>
           <h1>Deaths from COVID-19 over time</h1>

@@ -1,0 +1,18 @@
+
+.container {
+    width: 100%;
+}
+.container section {
+}
+
+.row {
+    display: flex;
+    align-items: start;
+    flex-direction: row;
+    padding: 1rem;
+    width: 100%;
+}
+
+.row > div {
+    flex-basis: 50%;
+}

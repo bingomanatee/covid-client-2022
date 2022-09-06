@@ -110,3 +110,8 @@ form *, input, textarea, form button {
   stroke: #0029c4;
   stroke-width: 4px;
 }
+
+article {
+  overflow: auto;
+  height: 100%;
+}

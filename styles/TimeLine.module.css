@@ -17,3 +17,22 @@
     fill: #EAFFD5;
     opacity: 0.5;
 }
+
+.rewind-stroke {
+    stroke: #01283d;
+    stroke-width: 2;
+    opacity: 0.5;
+    fill: none;
+    stroke-linejoin: round;
+}
+
+.rewind-fill:hover {
+    fill: #67caff;
+    opacity: 1;
+}
+
+.rewind-fill {
+    fill: #67caff;
+    opacity: 0.5;
+    stroke: none;
+}
