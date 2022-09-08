@@ -3,7 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import { useContext, useEffect, useMemo } from "react";
 import GlobeContext from "./GlobeContext";
 import TimeScale from "./TimeLine";
-import dayjs from "dayjs";
+import { useThree } from '@react-three/fiber'
 import ValueSeries from "./ValueScales";
 import LoadScreen from "./LoadScreen";
 import styles from '../styles/Globe.module.css'
@@ -15,16 +15,19 @@ if (typeof window !== 'undefined') {
   ThreeGlobe = require('three-globe').default;
 }
 
+function CameraSetter() {
+  const sceneState = useThree();
+ const {position} = sceneState.camera;
+  position.z = 180;
+  position.x = 25;
+}
+
 const CovidGlobe = () => {
   const {
     $features,
     $resolution,
     colorOf,
-    playing,
-    play,
-    stop,
     currentTime,
-    progress,
     $valueSeries,
     loading,
     stopLoading,
@@ -41,8 +44,29 @@ const CovidGlobe = () => {
     }
     return new ThreeGlobe({ animateIn: false })
       .hexPolygonResolution($resolution)
+      .labelResolution($resolution)
       .hexPolygonMargin(0.1)
       .globeImageUrl('/img/earth-dark.jpg')
+      .labelText((data) => {
+        console.log('label text data: ', data);
+        return data && data.properties ? data.properties.iso3 || '' : '';
+      })
+      .labelColor(() => 'white')
+      .labelSize(2)
+      .labelAltitude(0.01)
+      .labelLat(d => {
+        console.log('ll data:', d);
+        if (d && d.properties) {
+          return d.properties.latitude;
+        }
+        return 0;
+      })
+      .labelLng(d => {
+        if (d.properties) {
+          return d.properties.longitude;
+        }
+        return 0;
+      })
       .hexPolygonColor((country) => {
         return colorOf(country)
       });
@@ -51,6 +75,7 @@ const CovidGlobe = () => {
   useEffect(() => {
     if (globe && $features.length) {
       globe.hexPolygonsData([...$features])
+        .labelsData($features);
     }
   }, [globe, currentTime, $features]);
 
@@ -76,14 +101,15 @@ const CovidGlobe = () => {
         <directionalLight color="#cddbfe"/>
         <pointLight position={[10, 10, 10]}/>
         {(
-          <mesh position={[-20, -5, -180]}>
+          <group>
+            <CameraSetter />
             <Inspector>
               <primitive object={globe}/>
             </Inspector>
-          </mesh>
+          </group>
         )}
       </Canvas>
-      <TimeScale />
+      <TimeScale/>
       <header className={styles.header}>
         <div className={styles.title}>
           <h1>Deaths from COVID-19 over time</h1>
