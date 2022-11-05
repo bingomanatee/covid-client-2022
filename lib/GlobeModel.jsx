@@ -5,6 +5,7 @@ import { clamp } from 'lodash';
 import axios from "axios";
 import dayjs from "dayjs";
 import color from 'color';
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const CONTINENTS = ['all', 'Africa', 'Europe', 'Americas', 'Asia'];
 const toRGB = (list) => list.map((n) => clamp(Math.round(n * 255), 0, 255));
@@ -79,7 +80,7 @@ function analyze(target) {
   }
 }
 
-const API_URL = 'http://54.149.3.112/'; // 'https://covid-server.tech/'
+const API_URL = /* 'https://54.213.143.148/';  */ 'https://covid-server.tech/'
 
 let leaf = new Leaf({
   stateDeathData: [],
