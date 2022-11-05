@@ -79,7 +79,7 @@ function analyze(target) {
   }
 }
 
-const API_URL = 'https://covid-server.tech/'
+const API_URL = 'http://54.149.3.112/'; // 'https://covid-server.tech/'
 
 let leaf = new Leaf({
   stateDeathData: [],
